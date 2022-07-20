@@ -15,7 +15,10 @@ async function submitRegistrationForm() {
         var gender = 'M';
     else if (genderSelect == "Female")
         var gender = 'F';
-    else var gender = 'O';
+    else if (genderSelect == "Other")
+        var gender = 'O';
+     else
+        var gender = null;
     
     let xhr = new XMLHttpRequest();
 
@@ -45,6 +48,7 @@ async function submitRegistrationForm() {
             let response = JSON.parse(xhr.responseText);
             alert(response.message);
         }
+        document.getElementById("user-registration-form").reset();
     } catch (err) { // instead of onerror
         alert("Request failed");
     }
