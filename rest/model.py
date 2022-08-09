@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your secret key'
+app.config['SECRET_KEY'] = 'tranX'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -41,6 +41,10 @@ class User(db.Model):
     @classmethod
     def find_by_username(cls, user)->"User":
         return cls.query.filter_by(user=user).first()
+
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
 
     def delete_from_db(self):
         db.session.delete(self)

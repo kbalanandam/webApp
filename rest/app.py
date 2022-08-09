@@ -1,14 +1,32 @@
 from model import db, User, Post, Category, app
+import jwt
+import hmac
+from datetime import datetime, timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify
 from flask_cors import CORS
 from flask_restful import reqparse, Api, Resource
+from functools import wraps
 
-
-# import jwt
-# from werkzeug.security import generate_password_hash, check_password_hash
-# from functools import wraps
 CORS(app)
 api = Api(app)
+
+
+class Auth(Resource):
+
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', type=str, required=True, help='user name cannot be blank')
+        parser.add_argument('password', type=str, required=True, help='this cannot be blank')
+        try:
+            auth = parser.parse_args()
+            _user = User.find_by_username(auth.user)
+            if _user and hmac.compare_digest(_user.password, auth.password):
+                token = jwt.encode({'public_id': _user.id, 'exp': datetime.utcnow() + timedelta(minutes=30)}, key=app.config['SECRET_KEY'])
+                return {'token': token}, 201
+            return {'messageType': 'Error', 'message': 'Wrong User name or Password !!'}, 403
+        except Exception as e:
+            return {'messageType': 'Error', 'message': str(e)}, 500
 
 
 class UsersApi(Resource):
@@ -16,7 +34,7 @@ class UsersApi(Resource):
     def get(self):
         try:
             all_users = []
-            users = User.query.all()
+            users = User.find_all()
             for i in users:
                 user = {'firstname': i.firstname, 'lastname': i.lastname, 'gender': i.gender, 'user': i.user,
                         'email': i.email, 'id': i.id, 'createdon': i.createddate}
@@ -167,6 +185,7 @@ api.add_resource(CategoriesApi, '/api/categories', endpoint='categories')
 api.add_resource(CategoryApi, '/api/categories/<category>', endpoint='category')
 api.add_resource(UserPostApi, '/api/posts', endpoint='creatpost')
 api.add_resource(PostbyUserApi, '/api/posts/<user>', endpoint='userposts')
+api.add_resource(Auth, '/api/login', endpoint='login')
 
 
 if __name__ == '__main__':
