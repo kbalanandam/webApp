@@ -24,7 +24,6 @@ class User(db.Model):
         self.gender = gender
         self.createdby = createdby
 
-
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(30))
     lastname = db.Column(db.String(30))
@@ -128,6 +127,7 @@ class Category(db.Model):
 
     def __repr__(self):
         return '<Category %r>' % self.name
+
 
 if __name__ == '__main__':
     db.drop_all()

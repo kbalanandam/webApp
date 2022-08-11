@@ -1,36 +1,17 @@
 from model import db, User, Post, Category, app
-import jwt
-import hmac
-from datetime import datetime, timedelta
+from security import Auth, token_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import jsonify
+from flask import jsonify, request
 from flask_cors import CORS
 from flask_restful import reqparse, Api, Resource
-from functools import wraps
+
 
 CORS(app)
 api = Api(app)
 
 
-class Auth(Resource):
-
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('user', type=str, required=True, help='user name cannot be blank')
-        parser.add_argument('password', type=str, required=True, help='this cannot be blank')
-        try:
-            auth = parser.parse_args()
-            _user = User.find_by_username(auth.user)
-            if _user and hmac.compare_digest(_user.password, auth.password):
-                token = jwt.encode({'public_id': _user.id, 'exp': datetime.utcnow() + timedelta(minutes=30)}, key=app.config['SECRET_KEY'])
-                return {'token': token}, 201
-            return {'messageType': 'Error', 'message': 'Wrong User name or Password !!'}, 403
-        except Exception as e:
-            return {'messageType': 'Error', 'message': str(e)}, 500
-
-
 class UsersApi(Resource):
-
+    @token_required
     def get(self):
         try:
             all_users = []
@@ -66,7 +47,7 @@ class UsersApi(Resource):
 
 
 class UserApi(Resource):
-
+    @token_required
     def get(self, user):
         try:
             _user = User.find_by_username(user)
