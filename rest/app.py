@@ -1,5 +1,5 @@
 from model import db, User, Post, Category, app
-from apiSecurity import Auth, token_required
+from security import Auth, token_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify, request
 from flask_cors import CORS
